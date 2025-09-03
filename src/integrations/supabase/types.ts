@@ -14,7 +14,176 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      analytics: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          negative_sentiment: number
+          neutral_sentiment: number
+          pending_emails: number
+          positive_sentiment: number
+          resolved_emails: number
+          total_emails: number
+          updated_at: string
+          urgent_emails: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          id?: string
+          negative_sentiment?: number
+          neutral_sentiment?: number
+          pending_emails?: number
+          positive_sentiment?: number
+          resolved_emails?: number
+          total_emails?: number
+          updated_at?: string
+          urgent_emails?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          negative_sentiment?: number
+          neutral_sentiment?: number
+          pending_emails?: number
+          positive_sentiment?: number
+          resolved_emails?: number
+          total_emails?: number
+          updated_at?: string
+          urgent_emails?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      emails: {
+        Row: {
+          body: string
+          category: string | null
+          created_at: string
+          extracted_info: Json | null
+          id: string
+          priority: string
+          processed: boolean
+          received_at: string
+          sender_email: string
+          sentiment: string | null
+          subject: string
+          updated_at: string
+          urgency_keywords: string[] | null
+          user_id: string
+        }
+        Insert: {
+          body: string
+          category?: string | null
+          created_at?: string
+          extracted_info?: Json | null
+          id?: string
+          priority?: string
+          processed?: boolean
+          received_at?: string
+          sender_email: string
+          sentiment?: string | null
+          subject: string
+          updated_at?: string
+          urgency_keywords?: string[] | null
+          user_id: string
+        }
+        Update: {
+          body?: string
+          category?: string | null
+          created_at?: string
+          extracted_info?: Json | null
+          id?: string
+          priority?: string
+          processed?: boolean
+          received_at?: string
+          sender_email?: string
+          sentiment?: string | null
+          subject?: string
+          updated_at?: string
+          urgency_keywords?: string[] | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      knowledge_base: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          keywords: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          keywords?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          keywords?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      responses: {
+        Row: {
+          created_at: string
+          edited_response: string | null
+          email_id: string
+          generated_response: string
+          id: string
+          sent: boolean
+          sent_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          edited_response?: string | null
+          email_id: string
+          generated_response: string
+          id?: string
+          sent?: boolean
+          sent_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          edited_response?: string | null
+          email_id?: string
+          generated_response?: string
+          id?: string
+          sent?: boolean
+          sent_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "responses_email_id_fkey"
+            columns: ["email_id"]
+            isOneToOne: false
+            referencedRelation: "emails"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
