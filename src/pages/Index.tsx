@@ -3,11 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { LogOut, Mail, BarChart3, Settings, TestTube } from 'lucide-react';
+import { LogOut, Mail, BarChart3, Settings } from 'lucide-react';
 import AuthForm from '@/components/AuthForm';
 import Dashboard from '@/components/Dashboard';
 import EmailList from '@/components/EmailList';
-import EmailSimulator from '@/components/EmailSimulator';
+import GmailSync from '@/components/GmailSync';
 
 const Index = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -90,9 +90,9 @@ const Index = () => {
               <Mail className="h-4 w-4" />
               Emails
             </TabsTrigger>
-            <TabsTrigger value="simulator" className="flex items-center gap-2">
-              <TestTube className="h-4 w-4" />
-              Email Simulator
+            <TabsTrigger value="gmail" className="flex items-center gap-2">
+              <Mail className="h-4 w-4" />
+              Gmail Sync
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
@@ -116,15 +116,15 @@ const Index = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="simulator">
+          <TabsContent value="gmail">
             <div className="space-y-6">
               <div>
-                <h2 className="text-2xl font-bold mb-2">Email Simulator</h2>
+                <h2 className="text-2xl font-bold mb-2">Gmail Integration</h2>
                 <p className="text-muted-foreground">
-                  Test the AI processing system by simulating incoming support emails
+                  Sync and process emails directly from your Gmail account
                 </p>
               </div>
-              <EmailSimulator />
+              <GmailSync />
             </div>
           </TabsContent>
 
