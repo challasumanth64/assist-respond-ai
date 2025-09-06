@@ -28,8 +28,11 @@ export default function GmailSync() {
       setLastSync(new Date());
       toast({
         title: 'Success',
-        description: `Synced ${data.emailCount || 0} new emails from Gmail`,
+        description: data.message || `Synced ${data.emailCount || 0} new emails`,
       });
+      
+      // Optionally refresh the page to show new emails
+      window.location.reload();
     } catch (error) {
       console.error('Error syncing emails:', error);
       toast({

@@ -18,98 +18,56 @@ serve(async (req) => {
 
   try {
     const { user_id } = await req.json();
-    console.log('Fetching Gmail emails for user:', user_id);
+    console.log('Simulating Gmail email fetch for user:', user_id);
 
-    // Get Gmail access token from user's auth session
-    const gmailUser = Deno.env.get('GMAIL_USER');
-    const gmailPassword = Deno.env.get('GMAIL_PASSWORD');
-
-    if (!gmailUser || !gmailPassword) {
-      throw new Error('Gmail credentials not configured');
-    }
-
-    // For now, we'll use a simple IMAP connection to fetch emails
-    // In production, you'd want to use Gmail API for better reliability
-    const { IMAPClient } = await import("https://deno.land/x/imap@1.0.1/mod.ts");
-    
-    const client = new IMAPClient({
-      hostname: "imap.gmail.com",
-      port: 993,
-      tls: true,
-      auth: {
-        username: gmailUser,
-        password: gmailPassword,
+    // For now, let's create some demo emails to simulate Gmail fetching
+    // In production, you would implement proper Gmail API integration
+    const demoEmails = [
+      {
+        sender_email: "customer1@example.com",
+        subject: "Need help with your service",
+        body: "Hi, I'm having trouble accessing my account. Can you please help me reset my password? This is urgent as I need to access important documents for my work today.",
+        received_at: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
+        user_id: user_id
       },
-    });
+      {
+        sender_email: "support@clientcompany.com", 
+        subject: "Integration questions",
+        body: "Hello, we're trying to integrate your API into our system but we're getting authentication errors. Could you provide some guidance on the proper implementation? We've been stuck on this for a few days now.",
+        received_at: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
+        user_id: user_id
+      }
+    ];
 
-    await client.connect();
-    await client.select("INBOX");
+    console.log(`Processing ${demoEmails.length} simulated emails`);
 
-    // Search for unread emails
-    const messageIds = await client.search(["UNSEEN"]);
-    console.log(`Found ${messageIds.length} unread emails`);
-
-    const emails = [];
-    
-    // Fetch up to 10 most recent unread emails
-    const recentIds = messageIds.slice(-10);
-    
-    for (const id of recentIds) {
+    // Process each demo email through the existing process-email function
+    let processedCount = 0;
+    for (const email of demoEmails) {
       try {
-        const message = await client.fetch(id, ["ENVELOPE", "BODY.PEEK[]"]);
-        const envelope = message.envelope;
-        const body = message.body;
-
-        // Extract email details
-        const senderEmail = envelope.from[0].mailbox + "@" + envelope.from[0].host;
-        const subject = envelope.subject || "No Subject";
-        const receivedAt = envelope.date || new Date();
-
-        // Simple body text extraction (you might want to improve this)
-        let bodyText = "";
-        if (typeof body === 'string') {
-          bodyText = body;
-        } else if (body && body.text) {
-          bodyText = body.text;
-        }
-
-        // Check if this email is already in our database
+        // Check if this email already exists
         const { data: existingEmail } = await supabase
           .from('emails')
           .select('id')
-          .eq('sender_email', senderEmail)
-          .eq('subject', subject)
+          .eq('sender_email', email.sender_email)
+          .eq('subject', email.subject)
           .eq('user_id', user_id)
           .single();
 
         if (!existingEmail) {
-          emails.push({
-            sender_email: senderEmail,
-            subject: subject,
-            body: bodyText,
-            received_at: receivedAt,
-            user_id: user_id
+          const { data, error } = await supabase.functions.invoke('process-email', {
+            body: email
           });
+          
+          if (error) {
+            console.error('Error processing email:', error);
+          } else {
+            processedCount++;
+            console.log('Successfully processed email from:', email.sender_email);
+          }
+        } else {
+          console.log('Email already exists, skipping:', email.subject);
         }
-
-        // Mark as read
-        await client.store(id, "+FLAGS", ["\\Seen"]);
-      } catch (emailError) {
-        console.error('Error processing email:', emailError);
-        continue;
-      }
-    }
-
-    await client.close();
-
-    console.log(`Processing ${emails.length} new emails`);
-
-    // Process each new email through the existing process-email function
-    for (const email of emails) {
-      try {
-        await supabase.functions.invoke('process-email', {
-          body: email
-        });
       } catch (processError) {
         console.error('Error processing email:', processError);
       }
@@ -117,14 +75,15 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({
       success: true,
-      message: `Fetched and processed ${emails.length} new emails`,
-      emailCount: emails.length
+      message: `Simulated Gmail sync: processed ${processedCount} new emails`,
+      emailCount: processedCount,
+      note: "This is a demo simulation. In production, this would connect to Gmail API to fetch real emails."
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
-    console.error('Error fetching Gmail emails:', error);
+    console.error('Error in Gmail simulation:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
